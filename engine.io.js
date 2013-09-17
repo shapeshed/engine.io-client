@@ -8,29 +8,29 @@
  * @api public
  */
 
-function require(path, parent, orig) {
-  var resolved = require.resolve(path);
+function requireEIO(path, parent, orig) {
+  var resolved = requireEIO.resolve(path);
 
   // lookup failed
   if (null == resolved) {
     orig = orig || path;
     parent = parent || 'root';
-    var err = new Error('Failed to require "' + orig + '" from "' + parent + '"');
+    var err = new Error('Failed to requireEIO "' + orig + '" from "' + parent + '"');
     err.path = orig;
     err.parent = parent;
-    err.require = true;
+    err.requireEIO = true;
     throw err;
   }
 
-  var module = require.modules[resolved];
+  var module = requireEIO.modules[resolved];
 
-  // perform real require()
+  // perform real requireEIO()
   // by invoking the module's
   // registered function
   if (!module.exports) {
     module.exports = {};
     module.client = module.component = true;
-    module.call(this, module.exports, require.relative(resolved), module);
+    module.call(this, module.exports, requireEIO.relative(resolved), module);
   }
 
   return module.exports;
@@ -40,13 +40,13 @@ function require(path, parent, orig) {
  * Registered modules.
  */
 
-require.modules = {};
+requireEIO.modules = {};
 
 /**
  * Registered aliases.
  */
 
-require.aliases = {};
+requireEIO.aliases = {};
 
 /**
  * Resolve `path`.
@@ -62,7 +62,7 @@ require.aliases = {};
  * @api private
  */
 
-require.resolve = function(path) {
+requireEIO.resolve = function(path) {
   if (path.charAt(0) === '/') path = path.slice(1);
   var index = path + '/index.js';
 
@@ -76,11 +76,11 @@ require.resolve = function(path) {
 
   for (var i = 0; i < paths.length; i++) {
     var path = paths[i];
-    if (require.modules.hasOwnProperty(path)) return path;
+    if (requireEIO.modules.hasOwnProperty(path)) return path;
   }
 
-  if (require.aliases.hasOwnProperty(index)) {
-    return require.aliases[index];
+  if (requireEIO.aliases.hasOwnProperty(index)) {
+    return requireEIO.aliases[index];
   }
 };
 
@@ -93,7 +93,7 @@ require.resolve = function(path) {
  * @api private
  */
 
-require.normalize = function(curr, path) {
+requireEIO.normalize = function(curr, path) {
   var segs = [];
 
   if ('.' != path.charAt(0)) return path;
@@ -120,8 +120,8 @@ require.normalize = function(curr, path) {
  * @api private
  */
 
-require.register = function(path, definition) {
-  require.modules[path] = definition;
+requireEIO.register = function(path, definition) {
+  requireEIO.modules[path] = definition;
 };
 
 /**
@@ -132,23 +132,23 @@ require.register = function(path, definition) {
  * @api private
  */
 
-require.alias = function(from, to) {
-  if (!require.modules.hasOwnProperty(from)) {
+requireEIO.alias = function(from, to) {
+  if (!requireEIO.modules.hasOwnProperty(from)) {
     throw new Error('Failed to alias "' + from + '", it does not exist');
   }
-  require.aliases[to] = from;
+  requireEIO.aliases[to] = from;
 };
 
 /**
- * Return a require function relative to the `parent` path.
+ * Return a requireEIO function relative to the `parent` path.
  *
  * @param {String} parent
  * @return {Function}
  * @api private
  */
 
-require.relative = function(parent) {
-  var p = require.normalize(parent, '..');
+requireEIO.relative = function(parent) {
+  var p = requireEIO.normalize(parent, '..');
 
   /**
    * lastIndexOf helper.
@@ -163,12 +163,12 @@ require.relative = function(parent) {
   }
 
   /**
-   * The relative require() itself.
+   * The relative requireEIO() itself.
    */
 
   function localRequire(path) {
     var resolved = localRequire.resolve(path);
-    return require(resolved, parent, path);
+    return requireEIO(resolved, parent, path);
   }
 
   /**
@@ -178,7 +178,7 @@ require.relative = function(parent) {
   localRequire.resolve = function(path) {
     var c = path.charAt(0);
     if ('/' == c) return path.slice(1);
-    if ('.' == c) return require.normalize(p, path);
+    if ('.' == c) return requireEIO.normalize(p, path);
 
     // resolve deps by returning
     // the dep in the nearest "deps"
@@ -195,12 +195,12 @@ require.relative = function(parent) {
    */
 
   localRequire.exists = function(path) {
-    return require.modules.hasOwnProperty(localRequire.resolve(path));
+    return requireEIO.modules.hasOwnProperty(localRequire.resolve(path));
   };
 
   return localRequire;
 };
-require.register("component-emitter/index.js", function(exports, require, module){
+requireEIO.register("component-emitter/index.js", function(exports, requireEIO, module){
 
 /**
  * Expose `Emitter`.
@@ -359,7 +359,7 @@ Emitter.prototype.hasListeners = function(event){
 };
 
 });
-require.register("component-indexof/index.js", function(exports, require, module){
+requireEIO.register("component-indexof/index.js", function(exports, requireEIO, module){
 
 var indexOf = [].indexOf;
 
@@ -371,12 +371,12 @@ module.exports = function(arr, obj){
   return -1;
 };
 });
-require.register("LearnBoost-engine.io-protocol/lib/index.js", function(exports, require, module){
+requireEIO.register("LearnBoost-engine.io-protocol/lib/index.js", function(exports, requireEIO, module){
 /**
  * Module dependencies.
  */
 
-var keys = require('./keys');
+var keys = requireEIO('./keys');
 
 /**
  * Current protocol version.
@@ -541,7 +541,7 @@ exports.decodePayload = function (data, callback) {
 };
 
 });
-require.register("LearnBoost-engine.io-protocol/lib/keys.js", function(exports, require, module){
+requireEIO.register("LearnBoost-engine.io-protocol/lib/keys.js", function(exports, requireEIO, module){
 
 /**
  * Gets the keys for an object.
@@ -563,15 +563,15 @@ module.exports = Object.keys || function keys (obj){
 };
 
 });
-require.register("visionmedia-debug/index.js", function(exports, require, module){
+requireEIO.register("visionmedia-debug/index.js", function(exports, requireEIO, module){
 if ('undefined' == typeof window) {
-  module.exports = require('./lib/debug');
+  module.exports = requireEIO('./lib/debug');
 } else {
-  module.exports = require('./debug');
+  module.exports = requireEIO('./debug');
 }
 
 });
-require.register("visionmedia-debug/debug.js", function(exports, require, module){
+requireEIO.register("visionmedia-debug/debug.js", function(exports, requireEIO, module){
 
 /**
  * Expose `debug()` as the module.
@@ -602,7 +602,7 @@ function debug(name) {
       + fmt
       + ' +' + debug.humanize(ms);
 
-    // This hackery is required for IE8
+    // This hackery is requireEIOd for IE8
     // where `console.log` doesn't have 'apply'
     window.console
       && console.log
@@ -709,9 +709,9 @@ function coerce(val) {
 if (window.localStorage) debug.enable(localStorage.debug);
 
 });
-require.register("engine.io/lib/index.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/index.js", function(exports, requireEIO, module){
 
-module.exports = require('./socket');
+module.exports = requireEIO('./socket');
 
 /**
  * Exports parser
@@ -719,20 +719,20 @@ module.exports = require('./socket');
  * @api public
  *
  */
-module.exports.parser = require('engine.io-parser');
+module.exports.parser = requireEIO('engine.io-parser');
 
 });
-require.register("engine.io/lib/socket.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/socket.js", function(exports, requireEIO, module){
 /**
  * Module dependencies.
  */
 
-var util = require('./util')
-  , transports = require('./transports')
-  , Emitter = require('./emitter')
-  , debug = require('debug')('engine-client:socket')
-  , index = require('indexof')
-  , parser = require('engine.io-parser');
+var util = requireEIO('./util')
+  , transports = requireEIO('./transports')
+  , Emitter = requireEIO('./emitter')
+  , debug = requireEIO('debug')('engine-client:socket')
+  , index = requireEIO('indexof')
+  , parser = requireEIO('engine.io-parser');
 
 /**
  * Module exports.
@@ -840,11 +840,11 @@ Socket.sockets.evs = new Emitter;
  */
 
 Socket.Socket = Socket;
-Socket.Transport = require('./transport');
-Socket.Emitter = require('./emitter');
-Socket.transports = require('./transports');
-Socket.util = require('./util');
-Socket.parser = require('engine.io-parser');
+Socket.Transport = requireEIO('./transport');
+Socket.Emitter = requireEIO('./emitter');
+Socket.transports = requireEIO('./transports');
+Socket.util = requireEIO('./util');
+Socket.parser = requireEIO('engine.io-parser');
 
 /**
  * Creates transport of the given type.
@@ -1322,15 +1322,15 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 });
-require.register("engine.io/lib/transport.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transport.js", function(exports, requireEIO, module){
 
 /**
  * Module dependencies.
  */
 
-var util = require('./util')
-  , parser = require('engine.io-parser')
-  , Emitter = require('./emitter');
+var util = requireEIO('./util')
+  , parser = requireEIO('engine.io-parser')
+  , Emitter = requireEIO('./emitter');
 
 /**
  * Module exports.
@@ -1466,13 +1466,13 @@ Transport.prototype.onClose = function () {
 };
 
 });
-require.register("engine.io/lib/emitter.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/emitter.js", function(exports, requireEIO, module){
 
 /**
  * Module dependencies.
  */
 
-var Emitter = require('emitter');
+var Emitter = requireEIO('emitter');
 
 /**
  * Module exports.
@@ -1505,7 +1505,7 @@ Emitter.prototype.removeEventListener = Emitter.prototype.off;
 Emitter.prototype.removeListener = Emitter.prototype.off;
 
 });
-require.register("engine.io/lib/util.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/util.js", function(exports, requireEIO, module){
 /**
  * Status of page load.
  */
@@ -1711,7 +1711,7 @@ exports.ua.ios6 = exports.ua.ios && /OS 6_/.test(navigator.userAgent);
 
 exports.request = function request (xdomain) {
   try {
-    var _XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+    var _XMLHttpRequest = requireEIO('xmlhttprequest').XMLHttpRequest;
     return new _XMLHttpRequest();
   } catch (e) {}
 
@@ -1797,17 +1797,17 @@ exports.qsParse = function(qs){
 };
 
 });
-require.register("engine.io/lib/transports/index.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/index.js", function(exports, requireEIO, module){
 
 /**
  * Module dependencies
  */
 
-var XHR = require('./polling-xhr')
-  , JSONP = require('./polling-jsonp')
-  , websocket = require('./websocket')
-  , flashsocket = require('./flashsocket')
-  , util = require('../util');
+var XHR = requireEIO('./polling-xhr')
+  , JSONP = requireEIO('./polling-jsonp')
+  , websocket = requireEIO('./websocket')
+  , flashsocket = requireEIO('./flashsocket')
+  , util = requireEIO('../util');
 
 /**
  * Export transports.
@@ -1862,15 +1862,15 @@ function polling (opts) {
 };
 
 });
-require.register("engine.io/lib/transports/polling.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/polling.js", function(exports, requireEIO, module){
 /**
  * Module dependencies.
  */
 
-var Transport = require('../transport')
-  , util = require('../util')
-  , parser = require('engine.io-parser')
-  , debug = require('debug')('engine.io-client:polling');
+var Transport = requireEIO('../transport')
+  , util = requireEIO('../util')
+  , parser = requireEIO('engine.io-parser')
+  , debug = requireEIO('debug')('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -2092,15 +2092,15 @@ Polling.prototype.uri = function(){
 };
 
 });
-require.register("engine.io/lib/transports/polling-xhr.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/polling-xhr.js", function(exports, requireEIO, module){
 /**
- * Module requirements.
+ * Module requireEIOments.
  */
 
-var Polling = require('./polling')
-  , util = require('../util')
-  , Emitter = require('../emitter')
-  , debug = require('debug')('engine.io-client:polling-xhr');
+var Polling = requireEIO('./polling')
+  , util = requireEIO('../util')
+  , Emitter = requireEIO('../emitter')
+  , debug = requireEIO('debug')('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -2395,14 +2395,14 @@ if (xobject) {
 }
 
 });
-require.register("engine.io/lib/transports/polling-jsonp.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/polling-jsonp.js", function(exports, requireEIO, module){
 
 /**
- * Module requirements.
+ * Module requireEIOments.
  */
 
-var Polling = require('./polling')
-  , util = require('../util');
+var Polling = requireEIO('./polling')
+  , util = requireEIO('../util');
 
 /**
  * Module exports.
@@ -2630,15 +2630,15 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 });
-require.register("engine.io/lib/transports/websocket.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/websocket.js", function(exports, requireEIO, module){
 /**
  * Module dependencies.
  */
 
-var Transport = require('../transport')
-  , parser = require('engine.io-parser')
-  , util = require('../util')
-  , debug = require('debug')('engine.io-client:websocket');
+var Transport = requireEIO('../transport')
+  , parser = requireEIO('engine.io-parser')
+  , util = requireEIO('../util')
+  , debug = requireEIO('debug')('engine.io-client:websocket');
 
 /**
  * Module exports.
@@ -2833,21 +2833,21 @@ WS.prototype.check = function(){
 
 function ws(){
   if ('undefined' == typeof window) {
-    return require('ws');
+    return requireEIO('ws');
   }
 
   return global.WebSocket || global.MozWebSocket;
 }
 
 });
-require.register("engine.io/lib/transports/flashsocket.js", function(exports, require, module){
+requireEIO.register("engine.io/lib/transports/flashsocket.js", function(exports, requireEIO, module){
 /**
  * Module dependencies.
  */
 
-var WS = require('./websocket')
-  , util = require('../util')
-  , debug = require('debug')('engine.io-client:flashsocket');
+var WS = requireEIO('./websocket')
+  , util = requireEIO('../util')
+  , debug = requireEIO('debug')('engine.io-client:flashsocket');
 
 /**
  * Module exports.
@@ -3102,28 +3102,28 @@ function load (arr, fn) {
 };
 
 });
-require.alias("component-emitter/index.js", "engine.io/deps/emitter/index.js");
-require.alias("component-emitter/index.js", "emitter/index.js");
+requireEIO.alias("component-emitter/index.js", "engine.io/deps/emitter/index.js");
+requireEIO.alias("component-emitter/index.js", "emitter/index.js");
 
-require.alias("component-indexof/index.js", "engine.io/deps/indexof/index.js");
-require.alias("component-indexof/index.js", "indexof/index.js");
+requireEIO.alias("component-indexof/index.js", "engine.io/deps/indexof/index.js");
+requireEIO.alias("component-indexof/index.js", "indexof/index.js");
 
-require.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io/deps/engine.io-parser/lib/index.js");
-require.alias("LearnBoost-engine.io-protocol/lib/keys.js", "engine.io/deps/engine.io-parser/lib/keys.js");
-require.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io/deps/engine.io-parser/index.js");
-require.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io-parser/index.js");
-require.alias("LearnBoost-engine.io-protocol/lib/index.js", "LearnBoost-engine.io-protocol/index.js");
+requireEIO.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io/deps/engine.io-parser/lib/index.js");
+requireEIO.alias("LearnBoost-engine.io-protocol/lib/keys.js", "engine.io/deps/engine.io-parser/lib/keys.js");
+requireEIO.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io/deps/engine.io-parser/index.js");
+requireEIO.alias("LearnBoost-engine.io-protocol/lib/index.js", "engine.io-parser/index.js");
+requireEIO.alias("LearnBoost-engine.io-protocol/lib/index.js", "LearnBoost-engine.io-protocol/index.js");
 
-require.alias("visionmedia-debug/index.js", "engine.io/deps/debug/index.js");
-require.alias("visionmedia-debug/debug.js", "engine.io/deps/debug/debug.js");
-require.alias("visionmedia-debug/index.js", "debug/index.js");
+requireEIO.alias("visionmedia-debug/index.js", "engine.io/deps/debug/index.js");
+requireEIO.alias("visionmedia-debug/debug.js", "engine.io/deps/debug/debug.js");
+requireEIO.alias("visionmedia-debug/index.js", "debug/index.js");
 
-require.alias("engine.io/lib/index.js", "engine.io/index.js");
+requireEIO.alias("engine.io/lib/index.js", "engine.io/index.js");
 
 if (typeof exports == "object") {
-  module.exports = require("engine.io");
+  module.exports = requireEIO("engine.io");
 } else if (typeof define == "function" && define.amd) {
-  define(function(){ return require("engine.io"); });
+  define(function(){ return requireEIO("engine.io"); });
 } else {
-  this["eio"] = require("engine.io");
+  this["eio"] = requireEIO("engine.io");
 }})();
